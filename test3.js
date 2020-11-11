@@ -3,6 +3,7 @@ const fragmentSource = `
   uniform sampler2D humanTexture;
 
   uniform float zoom;
+  uniform float radius;
 
   void main() {
     float d = zoom;
@@ -20,16 +21,28 @@ const fragmentSource = `
     texCoords.x += (1.0-p) * 0.5;
     // texCoords += floor(tilingCoords);
 
+    vec2 tileCoords = ceil(tilingCoords);
+
+    float r = radius - 0.5;
+    if (tileCoords.x*tileCoords.x*p*p + tileCoords.y*tileCoords.y > r*r) discard;
+
     // gl_FragColor = vec4(st, 0.0, 1.0);
     gl_FragColor = texture2D(humanTexture, texCoords);
   }
 `;
 
-const slider = document.getElementById('zoomSlider');
-let zoom = slider.value;
+const zoomSlider = document.getElementById('zoomSlider');
+let zoom = zoomSlider.value;
 
-slider.oninput = () => {
-  zoom = slider.value;
+zoomSlider.oninput = () => {
+  zoom = zoomSlider.value;
+}
+
+const radiusSlider = document.getElementById('radiusSlider');
+let radius = radiusSlider.value;
+
+radiusSlider.oninput = () => {
+  radius = radiusSlider.value;
 }
 
 const width = 1024;
@@ -61,6 +74,7 @@ function setup() {
 
   ticker.add(() => {
     shader.uniforms.zoom = zoom;
+    shader.uniforms.radius = radius;
   });
 }
 
